@@ -1,22 +1,21 @@
-# Use NodeJS base image
-FROM node:13
+# Build
+FROM beevelop/ionic AS ionic
 
 # Create app directory
-WORKDIR /udagram/frontend
+WORKDIR /usr/src/app
 
 # Install app dependencies by copying
 # package.json and package-lock.json
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci
 
 # Copy app source
 COPY . .
+RUN ionic build
 
-# Bind the port that the image will run on
-EXPOSE 8080
-
-# Define the Docker image's behavior at runtime
-ENTRYPOINT ["ionic"]
-CMD ["serve", "8080", "--address", "0.0.0.0"]
+## Run 
+FROM nginx:alpine
+#COPY www /usr/share/nginx/html
+COPY --from=ionic  /usr/src/app/www /usr/share/nginx/html
